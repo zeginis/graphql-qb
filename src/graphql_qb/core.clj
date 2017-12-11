@@ -22,8 +22,16 @@
     (= (URI. "http://purl.org/linked-data/sdmx/2009/dimension#refArea") uri)
     (types/->RefAreaType)
     
+    ;;Added by Dimitris
+    (= (URI. "http://id.mareg.gr/statistics/def/dimension/area") uri)
+    (types/->RefAreaType)
+       
     (= (URI. "http://purl.org/linked-data/sdmx/2009/dimension#refPeriod") uri)
     (types/->RefPeriodType)
+    
+    ;;Added by Dimitris
+    ;;(= (URI. "http://id.mareg.gr/statistics/def/dimension/registration_year") uri)
+    ;;(types/->RefPeriodType)
     
     :else
     (let [items (get-enum-items repo dim)

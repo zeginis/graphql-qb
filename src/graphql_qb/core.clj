@@ -33,6 +33,10 @@
     (= (URI. "http://purl.org/linked-data/sdmx/2009/dimension#refPeriod") uri)
     (types/->RefPeriodType)
     
+    
+    (= (URI. "http://id.mareg.gr/statistics/def/dimension/area") uri)
+    (types/->RefAreaType)
+    
     :else
     (let [items (get-enum-items repo dim)
           enum-name (types/label->enum-name label)]

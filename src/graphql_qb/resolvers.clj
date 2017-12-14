@@ -9,7 +9,7 @@
 
 (defn get-observation-count [repo ds-uri ds-dimensions query-dimensions]
   (let [query (queries/get-observation-count-query ds-uri ds-dimensions query-dimensions)
-        results (repo/query repo query)]
+        results (util/eager-query repo query)]
     (:c (first results))))
 
 (defn get-dimension-measure-ordering [dataset sorts sort-spec]
@@ -59,7 +59,7 @@
         offset (get-offset args)
         total-matches (:total_matches observations-field)
         query (queries/get-observation-page-query ds-uri dimensions query-dimensions limit offset order-by-dim-measures)
-        results (repo/query repo query)
+        results (util/eager-query repo query)
         matches (mapv (fn [{:keys [obs mp mv] :as bindings}]
                         (let [dimension-values (map (fn [{:keys [field-name] :as ft}]
                                                       (let [result-key (keyword (types/->query-var-name ft))
@@ -78,7 +78,7 @@
 (defn resolve-datasets [context {:keys [dimensions measures uri] :as args} _parent]
   (let [repo (context/get-repository context)
         q (queries/get-datasets-query dimensions measures uri)
-        results (repo/query repo q)]
+        results (util/eager-query repo q)]
     (map (fn [{:keys [title] :as bindings}]
            (-> bindings
                (util/rename-key :ds :uri)
@@ -89,8 +89,26 @@
 
 (defn exec-observation-aggregation [repo dataset measure query-dimensions aggregation-fn]
   (let [q (queries/get-observation-aggregation-query aggregation-fn measure dataset query-dimensions)
-        results (repo/query repo q)]
+        results (util/eager-query repo q)]
     (get (first results) aggregation-fn)))
+
+(defn resolve-arguments [args type-mapping]
+  ;;TODO: deal with nested type mappings
+  (into {} (map (fn [[k graphql-value]]
+                  (if-let [type (get type-mapping k)]
+                    [k (types/from-graphql type graphql-value)]
+                    [k graphql-value]))
+                args)))
+
+(defn wrap-resolver
+  "Returns a resolver function which resolves the incoming GraphQL arguments according to the given
+   type mapping (e.g. resolves enum values to their underlying values). Updates the argument maps with the
+   resolved values and invokes the inner resolver function"
+  [resolver-fn type-mapping]
+  (fn [context args field]
+    (let [resolved-args (resolve-arguments args type-mapping)
+          updated-args (merge args resolved-args)]
+      (resolver-fn context updated-args field))))
 
 (defn resolve-observations-aggregation [aggregation-fn
                                         context

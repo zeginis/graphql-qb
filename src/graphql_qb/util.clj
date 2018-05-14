@@ -32,6 +32,12 @@
 (defn keyed-by [f s]
   (into {} (map (fn [v] [(f v) v]) s)))
 
+(defn map-values [f m]
+  (into {} (map (fn [[k v]] [k (f v)]) m)))
+
+(defn map-keys [f m]
+  (into {} (map (fn [[k v]] [(f k) v]) m)))
+
 (defn distinct-by
   "Returns a sequence containing distinct elements by the given key function."
   [f s]
@@ -59,3 +65,8 @@
   [repo sparql-string]
   (with-open [conn (repo/->connection repo)]
     (doall (repo/query conn sparql-string))))
+
+(defn find-first
+  "Returns the first item in s which satisfies the predicate p. Returns nil if no items satisfy p."
+  [p s]
+  (first (filter p s)))

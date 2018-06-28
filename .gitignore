@@ -12,4 +12,5 @@ pom.xml.asc
 .idea/
 *.iml
 logs
-/bin
+/bin/
+

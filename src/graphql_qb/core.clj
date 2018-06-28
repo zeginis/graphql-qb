@@ -66,7 +66,6 @@
                       datasets)]
     (filter can-generate-schema? datasets)))
 
-
 (defn get-numeric-measures [repo measures]
   (into #{} (filter (fn [measure-uri]
                       (let [results (vec (sp/query "sample-observation-measure.sparql" {:mt measure-uri} repo))]
